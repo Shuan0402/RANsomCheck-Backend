@@ -6,7 +6,7 @@
    - windows: myenv\Scripts\activate
    - Mac, Linux: source myenv_name/bin/activate
 3. module
-   pip install gunicorn Flask
+   pip install gunicorn Flask pytest requests
 4. deactivate
 ## Use
 1. run main.py
