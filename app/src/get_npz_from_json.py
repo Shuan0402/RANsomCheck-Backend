@@ -83,15 +83,15 @@ def input_generate(filename):
 
     data_x_name.append(api_sequence)
     data_x_semantic.append(semantic_sequence)
-    data_y.append(int(1))
+    data_y.append(int(0))
 
     data_x_name = np.array(data_x_name)
     data_x_semantic = np.array(data_x_semantic)
     data_y = np.array(data_y).reshape(-1, 1)
 
-    np.savez('./input.npz', x_name=data_x_name, x_semantic=data_x_semantic, y=data_y)
-    print(data_x_name)
-    print(data_x_semantic)
-    print(data_y)
+    np.savez('../input.npz', x_name=data_x_name, x_semantic=data_x_semantic, y=data_y)
+    # print(data_x_name)
+    # print(data_x_semantic)
+    # print(data_y)
 
 input_generate('test_report.json')
