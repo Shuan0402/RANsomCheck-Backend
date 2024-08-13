@@ -3,6 +3,7 @@ import os
 import sys
 import pytest
 from flask import Flask
+from tempfile import NamedTemporaryFile
 
 def test_valid_exe_upload(client):
     # with open("testfile.exe", "wb") as f:
@@ -40,7 +41,7 @@ def test_no_extension_file_upload(client):
     }
     response = client.post('/upload', data=data, content_type='multipart/form-data')
     assert response.status_code == 400
-    assert response.json == {"message": "False type of file"}
+    assert response.json == {"message": "Wrong type of file."}
 
     os.remove("testfile_no_ext")
 
@@ -53,6 +54,6 @@ def test_invalid_file_type_upload(client):
     }
     response = client.post('/upload', data=data, content_type='multipart/form-data')
     assert response.status_code == 400
-    assert response.json == {"message": "False type of file"}
+    assert response.json == {"message": "Wrong type of file."}
 
     os.remove("testfile.txt")
