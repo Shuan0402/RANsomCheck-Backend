@@ -1,5 +1,10 @@
-from flask import Blueprint, request, jsonify
+import uuid
 import os
+import requests
+
+from flask import Blueprint, request, jsonify
+
+from .cuckoo_service import upload_to_cuckoo, start_cuckoo_monitor
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_MIME_MAGIC = {b'MZ'}
@@ -20,8 +25,15 @@ def upload_file():
         return jsonify({'error': 'No selected file.'}), 400
 
     if file and is_allowed_file(file):
-        file.save(os.path.join(UPLOAD_FOLDER, file.filename))
-        return jsonify({"message": "File uploaded successfully."}), 200 
+        filename = str(uuid.uuid4())
+        path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(path)
+        success, task_id = upload_to_cuckoo(path)
+        if not success:
+            return jsonify({'error': task_id}), 500
+
+        start_cuckoo_monitor(path, task_id)
+        return jsonify({"message": f"File {filename} uploaded successfully.", "task_id": task_id}), 200 
 
     return jsonify({"message": "Wrong type of file."}), 400
 
@@ -36,3 +48,14 @@ def is_allowed_file(file):
         return True
 
     return False
+
+def upload_to_cuckoo(path):
+    r = requests.post(url + 'tasks/create/submit', files=[
+        ("files", open(path, "rb"))
+    ], headers=HEADERS)
+
+    if(r.status_code != 200):
+        return False, "Upload failed."
+    else:
+        task_ids = r.json()["task_ids"]
+        return True, task_ids[0]
