@@ -3,21 +3,27 @@ import threading
 import time
 import os
 
+from tempfile import NamedTemporaryFile
+from requests.exceptions import Timeout
+
 CUCKOO_URL = 'http://140.124.181.155/'
 PORT = '1337'
 HEADERS = {"Authorization": "Bearer YCjQF5fx4Ladj09Hf5ZApg"}
 REPORT_FOLDER = 'reports'
 
 def upload_to_cuckoo(file_path):
-    r = requests.post(CUCKOO_URL + 'tasks/create/submit', files=[
-        ("files", open(file_path, "rb"))
-    ], headers=HEADERS)
+    try:
+        r = requests.post(CUCKOO_URL + 'tasks/create/submit', files=[
+            ("files", open(file_path, "rb"))
+        ], headers=HEADERS, timeout=3)
 
-    if(r.status_code != 200):
-        return False, "Upload failed."
-    else:
-        task_ids = r.json()["task_ids"]
-        return True, task_ids[0]
+        if(r.status_code != 200):
+            return False, "Upload failed."
+        else:
+            task_ids = r.json()["task_ids"]
+            return True, task_ids[0]
+    except Timeout:
+        return False, "Connection timed out."
 
 def start_cuckoo_monitor(file_path):
     threading.Thread(target=check_cuckoo_status, args=(file_path), daemon=True).start()
@@ -38,8 +44,6 @@ def check_cuckoo_status(file_path, task_id):
                     threading.Thread(target=analyze_with_model, args=(report_path), daemon=True).start()
                 else:
                     print(f"Failed to download report: {report_path}")
-
-
                 break
         else:
             print("Failed to retrieve Cuckoo status.")
@@ -69,3 +73,10 @@ def fetch_result_by_ID(id):
 #     report_path = f"{file_path}.json"
 #     result = "Ransomware detected"
 #     update_status_to_completed(result)
+
+with NamedTemporaryFile(delete=False, suffix=".exe") as temp_file:
+    temp_file.write(b'MZ')
+    temp_file.seek(0)
+    file_path = temp_file.name
+    success, result = upload_to_cuckoo(file_path)
+    print(success)
