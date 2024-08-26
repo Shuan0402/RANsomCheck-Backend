@@ -48,14 +48,3 @@ def is_allowed_file(file):
         return True
 
     return False
-
-def upload_to_cuckoo(path):
-    r = requests.post(url + 'tasks/create/submit', files=[
-        ("files", open(path, "rb"))
-    ], headers=HEADERS)
-
-    if(r.status_code != 200):
-        return False, "Upload failed."
-    else:
-        task_ids = r.json()["task_ids"]
-        return True, task_ids[0]

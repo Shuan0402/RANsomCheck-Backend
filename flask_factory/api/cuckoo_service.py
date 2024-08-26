@@ -20,7 +20,7 @@ def upload_to_cuckoo(file_path):
         return True, task_ids[0]
 
 def start_cuckoo_monitor(file_path):
-    threading.Thread(target=check_cuckoo_status, args=(file_path,), daemon=True).start()
+    threading.Thread(target=check_cuckoo_status, args=(file_path), daemon=True).start()
 
 def check_cuckoo_status(file_path, task_id):
     while True:
@@ -44,16 +44,6 @@ def check_cuckoo_status(file_path, task_id):
         else:
             print("Failed to retrieve Cuckoo status.")
 
-def fetch_result_by_ID(id):
-    r = requests.get(url + 'tasks/report' + str(id) + '/json')
-    if(r.status_code == 200):
-        result = r.json()
-        return True, result
-    elif(r.status_code == 400):
-        return False, "Invalid report format."
-    elif(r.status_code == 404):
-        return False, "Report not found."
-
 def download_report(id):
     success, result = fetch_result_by_ID(id)
     
@@ -64,6 +54,16 @@ def download_report(id):
         return True, file_path
     else:
         return False, result
+
+def fetch_result_by_ID(id):
+    r = requests.get(url + 'tasks/report' + str(id) + '/json')
+    if(r.status_code == 200):
+        result = r.json()
+        return True, result
+    elif(r.status_code == 400):
+        return False, "Invalid report format."
+    elif(r.status_code == 404):
+        return False, "Report not found."
 
 # def analyze_with_model(file_path):
 #     report_path = f"{file_path}.json"
