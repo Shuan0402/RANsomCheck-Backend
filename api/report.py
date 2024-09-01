@@ -3,7 +3,7 @@ import json
 
 from datetime import datetime
 
-REPORT_FOLDER = 'reports'
+REPORT_FOLDER = '../reports'
 
 def create_report(file_name):
     if not os.path.exists(REPORT_FOLDER):
