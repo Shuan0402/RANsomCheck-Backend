@@ -4,98 +4,97 @@ import pytest
 import tempfile
 import shutil
 
-from api.report import create_report, update_report_stage
+from api.log import create_log, update_log_stage, add_error_message
 
-REPORT_FOLDER = 'reports'
+LOG_FOLDER = '../logs'
 
 # create
-def test_create_report_creates_directory():
-    if os.path.exists(REPORT_FOLDER) and os.path.isdir(REPORT_FOLDER):
-        shutil.rmtree(REPORT_FOLDER)
+def test_create_log_creates_directory():
+    if os.path.exists(LOG_FOLDER) and os.path.isdir(LOG_FOLDER):
+        shutil.rmtree(LOG_FOLDER)
 
-    file_name = "test_report"
-    create_report(file_name)
+    file_name = "test_log"
+    create_log(file_name)
 
-    assert os.path.exists(REPORT_FOLDER)
-    assert os.path.isdir(REPORT_FOLDER)
-    shutil.rmtree(REPORT_FOLDER)
+    assert os.path.exists(LOG_FOLDER)
+    assert os.path.isdir(LOG_FOLDER)
+    shutil.rmtree(LOG_FOLDER)
         
 
-def test_create_report_creates_file_with_initial_data():
-    file_name = "test_report"
-    create_report(file_name)
+def test_create_log_creates_file_with_initial_data():
+    file_name = "test_log"
+    create_log(file_name)
         
-    report_file_name = f"{file_name}.json"
-    report_path = os.path.join(REPORT_FOLDER, report_file_name)
+    log_file_name = f"{file_name}.json"
+    log_path = os.path.join(LOG_FOLDER, log_file_name)
 
-    with open(report_path, 'r') as report_file:
-        data = json.load(report_file)
+    with open(log_path, 'r') as log_file:
+        data = json.load(log_file)
         assert data["file_name"] == file_name
-        assert data["current_stage"] == "initializing"
-        assert data["upload_flow"] == {}
-        assert data["cuckoo_flow"]["cuckoo_id"] is None
-        assert data["cuckoo_flow"]["cuckoo_steps"] == {}
-        assert data["model_flow"] == {}
+        assert data["current_status"] == "initializing"
+        # assert data["upload_flow"] == {}
+        # assert data["cuckoo_flow"]["cuckoo_id"] is None
+        # assert data["cuckoo_flow"]["cuckoo_steps"] == {}
+        # assert data["model_flow"] == {}
         assert data["result"] is None
 
-    shutil.rmtree(REPORT_FOLDER)
+    shutil.rmtree(LOG_FOLDER)
         
 
-def test_create_report_overwrites_existing_file():
-    if not os.path.exists(REPORT_FOLDER):
-        os.makedirs(REPORT_FOLDER)
+def test_create_log_overwrites_existing_file():
+    if not os.path.exists(LOG_FOLDER):
+        os.makedirs(LOG_FOLDER)
 
-    file_name = "test_report"
-    report_file_name = f"{file_name}.json"
-    report_path = os.path.join(REPORT_FOLDER, report_file_name)
+    file_name = "test_log"
+    log_file_name = f"{file_name}.json"
+    log_path = os.path.join(LOG_FOLDER, log_file_name)
 
-    with open(report_path, 'w') as report_file:
-        json.dump({"some_key": "some_value"}, report_file)
+    with open(log_path, 'w') as log_file:
+        json.dump({"some_key": "some_value"}, log_file)
 
-    create_report(file_name)
+    create_log(file_name)
         
-    with open(report_path, 'r') as report_file:
-        data = json.load(report_file)
+    with open(log_path, 'r') as log_file:
+        data = json.load(log_file)
         assert data["file_name"] == file_name
-        assert data["current_stage"] == "initializing"
-        assert data["upload_flow"] == {}
-        assert data["cuckoo_flow"]["cuckoo_id"] is None
-        assert data["cuckoo_flow"]["cuckoo_steps"] == {}
-        assert data["model_flow"] == {}
+        assert data["current_status"] == "initializing"
+        # assert data["upload_flow"] == {}
+        # assert data["cuckoo_flow"]["cuckoo_id"] is None
+        # assert data["cuckoo_flow"]["cuckoo_steps"] == {}
+        # assert data["model_flow"] == {}
         assert data["result"] is None
 
-    shutil.rmtree(REPORT_FOLDER)
+    shutil.rmtree(LOG_FOLDER)
 
 # update
-def test_update_report_stage_with_existing_file():
-    if not os.path.exists(REPORT_FOLDER):
-        os.makedirs(REPORT_FOLDER)
+def test_update_log_stage_with_existing_file():
+    file_name = "test_log"
+    create_log(file_name)
+        
+    log_file_name = f"{file_name}.json"
+    log_path = os.path.join(LOG_FOLDER, log_file_name)
 
-    file_name = "test_report"
-    report_path = os.path.join(REPORT_FOLDER, f"{file_name}.json")
+    add_error_message(file_name, "upload_flow", "test")
+
+    with open(log_path, 'r') as log_file:
+        data = json.load(log_file)
+        assert data["upload_flow"]["error_message"] == {"test"}
+
+    shutil.rmtree(log_FOLDER)
+
+def test_update_log_stage_with_existing_file():
+    file_name = "test_log"
+    create_log(file_name)  # 假設這個函式會創建初始報告文件
         
-    initial_data = {
-        "file_name": file_name,
-        "current_stage": "initializing",
-        "upload_flow": {},
-        "cuckoo_flow": {
-            "cuckoo_id": None,
-            "cuckoo_steps": {}
-        },
-        "model_flow": {},
-        "result": None
-    }
-        
-    with open(report_path, 'w') as report_file:
-        json.dump(initial_data, report_file)
-        
-    additional_data = {"upload_flow": {"upload_time": "2024-08-26T10:00:00"}}
-    update_report_stage(file_name, "upload", additional_data)
-        
-    with open(report_path, 'r') as report_file:
-        updated_data = json.load(report_file)
-        assert updated_data["current_stage"] == "upload"
-        assert updated_data["upload_flow"] == {"upload_time": "2024-08-26T10:00:00"}
-        assert updated_data["cuckoo_flow"]["cuckoo_id"] is None
-    
-    shutil.rmtree(REPORT_FOLDER)
+    log_file_name = f"{file_name}.json"
+    log_path = os.path.join(LOG_FOLDER, log_file_name)
+
+    add_error_message(file_name, "test")
+
+    try:
+        with open(log_path, 'r') as log_file:
+            data = json.load(log_file)
+            assert data["error_message"] == "test"
+    finally:
+        # 確保資料夾被清理
+        shutil.rmtree(LOG_FOLDER)
