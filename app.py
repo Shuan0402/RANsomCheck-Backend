@@ -3,7 +3,6 @@ import os
 from flask import Flask
 
 from api.upload_route import upload_bp
-# from api.cuckoo_route import cuckoo_bp
 
 def create_app():
     app = Flask(__name__)
