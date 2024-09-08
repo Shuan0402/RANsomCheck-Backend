@@ -8,15 +8,15 @@ from requests.exceptions import Timeout
 from datetime import datetime
 
 from .log import update_log_stage, add_error_message
-from .model import start_model_monitor, upload_to_model
+# from .model_service import start_model_monitor, upload_to_model
 
 CUCKOO_URL = 'http://140.124.181.155'
 PORT = '1337'
 HEADERS = {"Authorization": "Bearer YCjQF5fx4Ladj09Hf5ZApg"}
 
-REPORT_FOLDER = 'reports'
-LOG_FOLDER = 'logs'
-UPLOAD_FOLDER = 'uploads'
+REPORT_FOLDER = '../reports'
+LOG_FOLDER = '../logs'
+UPLOAD_FOLDER = '../uploads'
 
 
 def upload_to_cuckoo(tracker_id):
@@ -59,20 +59,20 @@ def check_cuckoo_status(tracker_id, task_id):
                     }
                 }
                 update_log_stage(tracker_id, "cuckoo_complete", additional_data)
-                upload_to_model(tracker_id)
+                # upload_to_model(tracker_id)
                 additional_data = {
                     "model_flow": {
                         "upload_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     }
                 }
                 update_log_stage(tracker_id, "model_upload", additional_data)
-                start_model_monitor(tracker_id)
+                # start_model_monitor(tracker_id)
                 return True, "cuckoo success."
             else:
                 additional_data = {
                     "cuckoo_flow": {
                         "success": False
-                    }
+                    },
                     "error_message": "can not download the cuckoo report."
                 }
                 update_log_stage(tracker_id, "cuckoo_complete", additional_data)
@@ -92,7 +92,7 @@ def download_report(tracker_id, task_id):
     success, result = fetch_result_by_ID(task_id)
     
     if success:
-        file_path = os.path.join(REPORT_FOLDER, f"report_{tracker_id}.json")
+        file_path = os.path.join(REPORT_FOLDER, f"{tracker_id}.json")
         with open(file_path, 'w') as report_file:
             report_file.write(result)
         return True, file_path

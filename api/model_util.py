@@ -23,9 +23,7 @@ word2behavior = word2behavior['word2behavior'][()]
 behavior2id = np.load('../src/behavior2id.npz', allow_pickle=True)
 behavior2id = behavior2id['behavior2id'][()]
 
-NPZ = '../npz'
-
-os.makedirs(NPZ, exist_ok=True)
+REPORT_FOLDER = '../reports'
 
 def is_number(s):
     try:
@@ -34,15 +32,14 @@ def is_number(s):
     except ValueError:
         return False
 
-def api_extraction(filename):
-    path = '../reports/'
-
+def api_extraction(tracker_id):
+    report_path = os.path.join(REPORT_FOLDER, f"{tracker_id}.json")
     report_list = []
     api_num = []
     n = 0
 
-    if os.path.exists(path + filename):
-        with open(path + filename, 'r') as load_f:
+    if os.path.exists(report_path):
+        with open(report_path, 'r') as load_f:
             try:
                 report_dict = {}
                 call_list = []
@@ -69,8 +66,8 @@ def api_extraction(filename):
 
     return(api_num)
 
-def input_generate(filename):
-    data = api_extraction(filename)
+def input_generate(tracker_id):
+    data = api_extraction(tracker_id)
 
     data_x_name = []
     data_x_semantic = []
@@ -103,11 +100,7 @@ def input_generate(filename):
     data_x_semantic = np.array(data_x_semantic)
     data_y = np.array(data_y).reshape(-1, 1)
 
-    np.savez('../npz/input.npz', x_name=data_x_name, x_semantic=data_x_semantic, y=data_y)
-    print(data_x_name)
-    print(data_x_semantic)
-    print(data_y)
-
+    return(data_x_name, data_x_semantic, data_y)
 
 
 class Net(torch.nn.Module):
@@ -174,10 +167,8 @@ def predict(loader):
 model = torch.load('../src/model.pkl', map_location=device)
 model = model.to(device)
 
-def get_result(input_npz):
-    input_data = np.load('../npz/' + input_npz, allow_pickle=True)
-    input_x_name = input_data['x_name']
-    input_x_semantic = input_data['x_semantic']
+def get_result(tracker_id):
+    input_x_name, input_x_semantic, y = input_generate(tracker_id)
 
     input_x = np.concatenate([input_x_name, input_x_semantic], 1)
 
@@ -200,4 +191,6 @@ def get_result(input_npz):
     print("Predictions:")
     print(predictions)
 
-# get_result('input.npz')
+get_result("test_report")
+
+# input_generate("test_report")

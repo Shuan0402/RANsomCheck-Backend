@@ -23,7 +23,7 @@ def upload_file():
         return jsonify({'error': 'No file part.'}), 400
 
     file = request.files['file']
-
+    
     if file.filename == '':
         return jsonify({'error': 'No selected file.'}), 400
 
@@ -57,14 +57,17 @@ def upload_file():
         success, task_id = upload_to_cuckoo(tracker_id)
         
         if not success:
-            return jsonify({'error': task_id}), 500
             add_error_message(tracker_id, "cuckoo upload failed")
+            return jsonify({"error": task_id, "tracker_id": tracker_id}), 500
 
         update_log_stage(tracker_id, "cuckoo_analysis", additional_data)
         start_cuckoo_monitor(tracker_id)
-        return jsonify({"message": f"File {filename} uploaded successfully.", "task_id": task_id}), 200 
+        return jsonify({"message": f"File {filename} uploaded successfully.",
+                         "task_id": task_id,
+                         "tracker_id": tracker_id}), 200 
 
-    return jsonify({"message": "Wrong type of file."}), 400
+    return jsonify({"message": "Wrong type of file.",
+                    "tracker_id": tracker_id}), 400
 
 def is_allowed_file(file):
     if '.' not in file.filename:
