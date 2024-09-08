@@ -191,6 +191,8 @@ def get_result(tracker_id):
     print("Predictions:")
     print(predictions)
 
-get_result("test_report")
+    return(predictions)
+
+# get_result("test_report")
 
 # input_generate("test_report")

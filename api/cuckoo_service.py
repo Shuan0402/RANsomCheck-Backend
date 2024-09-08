@@ -59,14 +59,14 @@ def check_cuckoo_status(tracker_id, task_id):
                     }
                 }
                 update_log_stage(tracker_id, "cuckoo_complete", additional_data)
-                # upload_to_model(tracker_id)
+                upload_to_model(tracker_id)
                 additional_data = {
                     "model_flow": {
                         "upload_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     }
                 }
                 update_log_stage(tracker_id, "model_upload", additional_data)
-                # start_model_monitor(tracker_id)
+                start_model_monitor(tracker_id)
                 return True, "cuckoo success."
             else:
                 additional_data = {
