@@ -3,6 +3,7 @@ import os
 from flask import Flask
 
 from api.upload_route import upload_bp
+from api.result_route import result_bp
 
 def create_app():
     app = Flask(__name__)

@@ -40,7 +40,7 @@ def upload_file():
     update_log_stage(tracker_id, "upload", additional_data)
     
     if file and is_allowed_file(file):
-        path = os.path.join(UPLOAD_FOLDER, file.file_name)
+        path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(path)
         additional_data = {
             "upload_flow": {
@@ -62,7 +62,7 @@ def upload_file():
 
         update_log_stage(tracker_id, "cuckoo_analysis", additional_data)
         start_cuckoo_monitor(tracker_id)
-        return jsonify({"message": f"File {filename} uploaded successfully.",
+        return jsonify({"message": f"File {tracker_id} uploaded successfully.",
                          "task_id": task_id,
                          "tracker_id": tracker_id}), 200 
 

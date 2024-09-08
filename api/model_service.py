@@ -40,4 +40,4 @@ def upload_to_model(tracker_id):
 
     return True
 
-check_model_status("test_report")
+# check_model_status("test_report")

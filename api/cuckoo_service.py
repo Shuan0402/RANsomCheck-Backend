@@ -8,7 +8,7 @@ from requests.exceptions import Timeout
 from datetime import datetime
 
 from .log import update_log_stage, add_error_message
-# from .model_service import start_model_monitor, upload_to_model
+from .model_service import start_model_monitor, upload_to_model
 
 CUCKOO_URL = 'http://140.124.181.155'
 PORT = '1337'
