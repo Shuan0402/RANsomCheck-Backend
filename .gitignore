@@ -1,4 +1,3 @@
-*.npz
 .env
 *.pyc
 *.exe

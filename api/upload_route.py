@@ -5,8 +5,8 @@ import requests
 from flask import Blueprint, request, jsonify
 from datetime import datetime
 
-from .cuckoo_service import upload_to_cuckoo, start_cuckoo_monitor
-from .log import create_log, update_log_stage, add_error_message
+from api.cuckoo_service import upload_to_cuckoo, start_cuckoo_monitor
+from api.log import create_log, update_log_stage, add_error_message
 
 
 UPLOAD_FOLDER = 'uploads'

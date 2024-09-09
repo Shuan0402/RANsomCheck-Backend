@@ -8,7 +8,7 @@ result_bp = Blueprint("result", __name__)
 
 LOG_FOLDER = "../logs"
 
-@result_bp.route("log/<uuid>/<item>", methods=['GET'])
+@result_bp.route("/log/<uuid>/<item>", methods=['GET'])
 def get_item(uuid, item):
     """
     這是一個回傳的 route function，主要拿來獲取某個評測 uuid 的 log 之 item。
@@ -22,7 +22,7 @@ def get_item(uuid, item):
     else:
         return jsonify({"error": "Item not found"}), 404
 
-@result_bp.route("log/<uuid>", methods=['GET'])
+@result_bp.route("/log/<uuid>", methods=['GET'])
 def get_log(uuid):
     """
     這是一個回傳的 route function，主要拿來獲取某個評測 uuid 的 log。
