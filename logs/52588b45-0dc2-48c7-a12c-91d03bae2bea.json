@@ -1,0 +1,22 @@
+{
+    "file_name": "tmplmcohdth.exe",
+    "tracker_id": "52588b45-0dc2-48c7-a12c-91d03bae2bea",
+    "current_status": "initializing",
+    "upload_flow": {
+        "upload_time": "2024-09-09 04:13:32"
+    },
+    "task_id": null,
+    "cuckoo_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "model_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "result": null,
+    "error_message": null,
+    "current_stage": "upload"
+}

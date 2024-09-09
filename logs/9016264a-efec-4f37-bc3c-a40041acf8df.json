@@ -1,0 +1,22 @@
+{
+    "file_name": "testfile.exe",
+    "tracker_id": "9016264a-efec-4f37-bc3c-a40041acf8df",
+    "current_status": "initializing",
+    "upload_flow": {
+        "upload_time": "2024-09-09 04:13:31"
+    },
+    "task_id": null,
+    "cuckoo_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "model_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "result": null,
+    "error_message": null,
+    "current_stage": "upload"
+}

@@ -1,0 +1,22 @@
+{
+    "file_name": "tmpdxdfln7l",
+    "tracker_id": "97804bc5-f130-4229-b79b-1d7c9d237cb0",
+    "current_status": "initializing",
+    "upload_flow": {
+        "upload_time": "2024-09-09 04:13:32"
+    },
+    "task_id": null,
+    "cuckoo_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "model_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "result": null,
+    "error_message": null,
+    "current_stage": "upload"
+}

@@ -1,0 +1,22 @@
+{
+    "file_name": "tmpnhowvmd2.exe",
+    "tracker_id": "847f02f5-8f16-445e-847f-47b3124fa194",
+    "current_status": "initializing",
+    "upload_flow": {
+        "upload_time": "2024-09-09 04:13:31"
+    },
+    "task_id": null,
+    "cuckoo_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "model_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "result": null,
+    "error_message": null,
+    "current_stage": "upload"
+}

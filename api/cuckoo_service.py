@@ -21,7 +21,7 @@ UPLOAD_FOLDER = '../uploads'
 
 def upload_to_cuckoo(tracker_id):
     try:
-        log_path = os.path(LOG_FOLDER, f"{tracker_id}.json")
+        log_path = os.path.join(LOG_FOLDER, f"{tracker_id}.json")
         file_name = ""
         with open(log_path, 'r') as log_file:
             data = json.load(log_file)

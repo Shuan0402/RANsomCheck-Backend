@@ -1,0 +1,22 @@
+{
+    "file_name": "tmpb6hghil1txt",
+    "tracker_id": "388bb39a-1fda-4e12-8e53-a2004e2f27d9",
+    "current_status": "initializing",
+    "upload_flow": {
+        "upload_time": "2024-09-09 04:13:32"
+    },
+    "task_id": null,
+    "cuckoo_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "model_flow": {
+        "upload_time": null,
+        "complete_time": null,
+        "success": null
+    },
+    "result": null,
+    "error_message": null,
+    "current_stage": "upload"
+}

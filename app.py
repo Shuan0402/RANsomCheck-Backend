@@ -13,6 +13,7 @@ def create_app():
     app.config['ALLOWED_EXTENSIONS'] = {'exe', 'dll'}
 
     app.register_blueprint(upload_bp)
+    app.register_blueprint(result_bp)
 
     return app
 
