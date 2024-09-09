@@ -1,6 +1,12 @@
 .env
 *.pyc
 *.exe
+*/bin/
+*/lib64
+logs/
+uploads/
+*/share/
+*/pyvenv.cfg
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -28,15 +28,15 @@ def upload_to_cuckoo(tracker_id):
             data = json.load(log_file)
             file_name = data["file_name"]
         path = os.path.join(UPLOAD_FOLDER, file_name)
-        r = requests.post(CUCKOO_URL + ":" + str(PORT) +  '/tasks/create/submit', files=[
-            ("files", open(path, "rb"))
-        ], headers=HEADERS, timeout=30)
+        with open(path, "rb") as sample:
+            files = {"file": ("files", sample), "priority": 3, "unique": False}
+            r = requests.post(CUCKOO_URL + ":" + str(PORT) +  '/tasks/create/file', files=files, headers=HEADERS, timeout=30, data={"priority": 3, "unique": False})
 
         if(r.status_code != 200):
             return False, "Upload failed."
         else:
-            task_ids = r.json()["task_ids"]
-            return True, task_ids[0]
+            task_id = r.json()["task_id"]
+            return True, task_id
     except Timeout:
         return False, "Connection timed out."
 
@@ -47,7 +47,7 @@ def check_cuckoo_status(tracker_id, task_id):
     while True:
         time.sleep(10)
 
-        response = requests.get(CUCKOO_URL + ":" + str(PORT) + '/tasks/view/' + str(task_id), headers=HEADERS)
+        r = requests.get(CUCKOO_URL + ":" + str(PORT) + '/tasks/view/' + str(task_id), headers=HEADERS)
         
         status = r.json()["task"]["status"]
         if(r.status_code == 200 and status == "completed"):
