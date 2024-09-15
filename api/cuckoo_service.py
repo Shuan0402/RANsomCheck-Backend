@@ -7,8 +7,9 @@ import json
 from tempfile import NamedTemporaryFile
 from requests.exceptions import Timeout
 from datetime import datetime
+from http import HTTPStatus
 
-from .log import update_log_stage, add_error_message
+from .log import LogManager
 from .model_service import start_model_monitor, upload_to_model
 
 CUCKOO_URL = 'http://140.124.181.155'
@@ -32,7 +33,7 @@ def upload_to_cuckoo(tracker_id):
             files = {"file": ("files", sample), "priority": 3, "unique": False}
             r = requests.post(CUCKOO_URL + ":" + str(PORT) +  '/tasks/create/file', files=files, headers=HEADERS, timeout=30, data={"priority": 3, "unique": False})
 
-        if(r.status_code != 200):
+        if(r.status_code != HTTPStatus.OK):
             return False, "Upload failed."
         else:
             task_id = r.json()["task_id"]
@@ -50,7 +51,7 @@ def check_cuckoo_status(tracker_id, task_id):
         r = requests.get(CUCKOO_URL + ":" + str(PORT) + '/tasks/view/' + str(task_id), headers=HEADERS)
         
         status = r.json()["task"]["status"]
-        if(r.status_code == 200 and status == "completed"):
+        if(r.status_code == HTTPStatus.OK and status == "completed"):
             success, result = download_report(tracker_id, task_id)
             if(success):
                 additional_data = {
