@@ -1,8 +1,13 @@
-# import os
-# import json
-# import pytest
-# import tempfile
-# import shutil
+from . import client
+
+import os
+import json
+import pytest
+import tempfile
+import shutil
+
+from flask import current_app
+from http import HTTPStatus
 
 # from api.log import create_log, update_log_stage, add_error_message
 
@@ -98,3 +103,29 @@
 #     finally:
 #         # 確保資料夾被清理
 #         shutil.rmtree(LOG_FOLDER)
+
+TEST_UUID = "test-uuid"
+LOG_FOLDER = "test_logs"
+LOG_FILE_PATH = f"{LOG_FOLDER}/{TEST_UUID}.json"
+
+def create_test_log_file():
+    """
+    创建一个测试用的日志文件
+    """
+    os.makedirs(LOG_FOLDER, exist_ok=True)
+    with open(LOG_FILE_PATH, "w") as f:
+        json.dump({"test": "log content"}, f)
+
+def test_get_log_success(client):
+    """
+    测试成功获取日志文件的情况
+    """
+    # 先创建测试用的日志文件
+    create_test_log_file()
+
+    # 发送 GET 请求，获取日志
+    response = client.get(f"/log/{TEST_UUID}")
+
+    # 验证响应
+    assert response.status_code == HTTPStatus.OK
+    assert response.json == {"test": "log content"}
