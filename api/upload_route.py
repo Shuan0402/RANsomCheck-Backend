@@ -34,7 +34,7 @@ def upload_file():
             "start_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
     }
-    log_manager.update_stage("upload", additional_data)
+    log_manager.update_log_stage("upload", additional_data)
     
     if file and is_allowed_file(file, current_app):
         path = os.path.join(UPLOAD_FOLDER, file.filename)
@@ -61,7 +61,7 @@ def upload_file():
                 "error_message": "cuckoo upload failed"
             }
 
-            log_manager.update_stage("Failed", additional_data)
+            log_manager.update_log_stage("Failed", additional_data)
 
             return make_response({"error": "Cuckoo upload failed", "tracker_id": tracker_id}, HTTPStatus.INTERNAL_SERVER_ERROR)
         

@@ -3,8 +3,6 @@ import json
 from datetime import datetime
 import uuid
 
-
-
 class LogManager:
     def __init__(self, file_name, app):
         LOG_FOLDER = app.config['LOG_FOLDER']
@@ -42,7 +40,7 @@ class LogManager:
         with open(self.log_path, 'w') as log_file:
             json.dump(self.log_data, log_file, indent=4)
 
-    def update_stage(self, current_stage, additional_data=None):
+    def update_log_stage(self, current_stage, additional_data=None):
         if os.path.exists(self.log_path):
             with open(self.log_path, 'r') as log_file:
                 self.log_data = json.load(log_file)
@@ -54,13 +52,3 @@ class LogManager:
         
         with open(self.log_path, 'w') as log_file:
             json.dump(self.log_data, log_file, indent=4)
-
-    # def add_error(self, message):
-    #     if os.path.exists(self.log_path):
-    #         with open(self.log_path, 'r') as log_file:
-    #             self.log_data = json.load(log_file)
-        
-    #     self.log_data["error_message"] = message
-
-    #     with open(self.log_path, 'w') as log_file:
-    #         json.dump(self.log_data, log_file, indent=4)
