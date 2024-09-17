@@ -99,7 +99,8 @@ def predict(loader):
             pred = torch.where(pred >= 0.5, torch.ones_like(pred), torch.zeros_like(pred))
         return pred.to('cpu').detach().numpy().tolist()[0]
 
-model = Net()
+# model = Net()
+model = Net().to(device)
 torch.save(model, '../src/model.pkl')
 
 def get_result(tracker_id):

@@ -65,7 +65,7 @@ def upload_file():
 
             return make_response({"error": "Cuckoo upload failed", "tracker_id": tracker_id}, HTTPStatus.INTERNAL_SERVER_ERROR)
         
-        update_log_stage(tracker_id, "cuckoo_analysis", {})
+        log_manager.update_log_stage(tracker_id, "cuckoo_analysis", {})
 
         start_cuckoo_monitor(tracker_id)
         return make_response({"message": f"File {tracker_id} uploaded successfully.", "task_id": task_id, "tracker_id": tracker_id}, HTTPStatus.OK)
