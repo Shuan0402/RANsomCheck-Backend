@@ -1,7 +1,4 @@
-import os
 import json
-import time
-import pytest
 from unittest.mock import patch, MagicMock, mock_open
 from datetime import datetime
 
@@ -9,8 +6,10 @@ from api.model_util import get_result
 from api.model_service import upload_to_model, check_model_status
 
 def test_get_result_success():
-    uuid = "test"
-    prediction = get_result(uuid)
+    app = MagicMock()
+
+    tracker_id = "test"
+    prediction = get_result(tracker_id, app)
     assert prediction == [1.0] or prediction == [0.0]
 
 @patch('api.model_service.get_result')
@@ -26,7 +25,7 @@ def test_upload_to_model_success(mock_log_init, mock_update_log_stage, mock_get_
 
     assert result is True
 
-    mock_get_result.assert_called_once_with(tracker_id)
+    mock_get_result.assert_called_once_with(tracker_id, app)
 
     mock_update_log_stage.assert_called_once_with(
         "complete",

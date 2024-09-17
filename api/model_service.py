@@ -32,7 +32,7 @@ def check_model_status(tracker_id, app):
 def upload_to_model(tracker_id, app):
     log_manager = LogManager(tracker_id, app)
     try:
-        result = get_result(tracker_id)
+        result = get_result(tracker_id, app)
 
         additional_data = {
             "model_flow": {

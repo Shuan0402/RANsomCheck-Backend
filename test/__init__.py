@@ -17,22 +17,22 @@ def client():
             os.makedirs(app.config['REPORT_FOLDER'], exist_ok=True)
         yield client
 
-    for file in os.listdir(app.config['UPLOAD_FOLDER']):
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], file)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-    os.rmdir(app.config['UPLOAD_FOLDER'])
+    # for file in os.listdir(app.config['UPLOAD_FOLDER']):
+    #     file_path = os.path.join(app.config['UPLOAD_FOLDER'], file)
+    #     if os.path.isfile(file_path):
+    #         os.remove(file_path)
+    # os.rmdir(app.config['UPLOAD_FOLDER'])
 
-    for file in os.listdir(app.config['LOG_FOLDER']):
-        file_path = os.path.join(app.config['LOG_FOLDER'], file)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-    os.rmdir(app.config['LOG_FOLDER'])
+    # for file in os.listdir(app.config['LOG_FOLDER']):
+    #     file_path = os.path.join(app.config['LOG_FOLDER'], file)
+    #     if os.path.isfile(file_path):
+    #         os.remove(file_path)
+    # os.rmdir(app.config['LOG_FOLDER'])
 
-    for file in os.listdir(app.config['REPORT_FOLDER']):
-        file_path = os.path.join(app.config['REPORT_FOLDER'], file)
-        if os.path.isfile(file_path):
-            os.remove(file_path)
-    os.rmdir(app.config['REPORT_FOLDER'])
+    # for file in os.listdir(app.config['REPORT_FOLDER']):
+    #     file_path = os.path.join(app.config['REPORT_FOLDER'], file)
+    #     if os.path.isfile(file_path):
+    #         os.remove(file_path)
+    # os.rmdir(app.config['REPORT_FOLDER'])
 
     

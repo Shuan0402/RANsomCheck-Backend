@@ -14,7 +14,7 @@ upload_bp = Blueprint('upload', __name__)
 
 @upload_bp.route('/upload', methods=['POST'])
 def upload_file():
-    UPLOAD_FOLDER = upload_folder = current_app.config['UPLOAD_FOLDER']
+    UPLOAD_FOLDER = current_app.config['UPLOAD_FOLDER']
 
     if 'file' not in request.files:
         return make_response({'error': 'No file part.'}, HTTPStatus.BAD_REQUEST)
@@ -49,9 +49,10 @@ def upload_file():
                 "start_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
         }
+
         log_manager.update_log_stage("cuckoo_upload", additional_data)
     
-        success, task_id = upload_to_cuckoo(tracker_id)
+        success, task_id = upload_to_cuckoo(tracker_id, current_app)
         
         if not success:
             additional_data = {
@@ -65,9 +66,15 @@ def upload_file():
 
             return make_response({"error": "Cuckoo upload failed", "tracker_id": tracker_id}, HTTPStatus.INTERNAL_SERVER_ERROR)
         
-        log_manager.update_log_stage(tracker_id, "cuckoo_analysis", {})
+        additional_data = {
+            'task_id': task_id
+        }
 
-        start_cuckoo_monitor(tracker_id)
+        log_manager.update_log_stage("cuckoo_analysis", additional_data)
+
+        print("monitor")
+        start_cuckoo_monitor(tracker_id, current_app)
+        
         return make_response({"message": f"File {tracker_id} uploaded successfully.", "task_id": task_id, "tracker_id": tracker_id}, HTTPStatus.OK)
 
     return make_response({"message": "Wrong type of file.", "tracker_id": tracker_id}, HTTPStatus.BAD_REQUEST)
@@ -87,7 +94,7 @@ def is_allowed_file(file, app):
 
     file.stream.seek(0, 0)
     
-    if magic_number in ALLOWED_MIME_MAGIC and ext in ALLOWED_EXTENSIONS:
+    if ext in ALLOWED_EXTENSIONS:
         return True
     
     return False

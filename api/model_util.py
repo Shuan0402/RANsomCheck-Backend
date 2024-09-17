@@ -14,13 +14,20 @@ warnings.filterwarnings("ignore")
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print('device', device)
 
-word2id = np.load('../src/word2id.npz', allow_pickle=True)['word2id'].item()
-word2behavior = np.load('../src/word2behavior.npz', allow_pickle=True)['word2behavior'].item()
-behavior2id = np.load('../src/behavior2id.npz', allow_pickle=True)['behavior2id'].item()
+base_dir = os.path.dirname(os.path.abspath(__file__))
+word2id_path = os.path.join(base_dir, '..', 'src', 'word2id.npz')
+word2behavior_path = os.path.join(base_dir, '..', 'src', 'word2behavior.npz')
+behavior2id_path = os.path.join(base_dir, '..', 'src', 'behavior2id.npz')
+
+
+word2id = np.load(word2id_path, allow_pickle=True)['word2id'].item()
+word2behavior = np.load(word2behavior_path, allow_pickle=True)['word2behavior'].item()
+behavior2id = np.load(behavior2id_path, allow_pickle=True)['behavior2id'].item()
 
 REPORT_FOLDER = '../reports'
 
-def api_extraction(tracker_id):
+def api_extraction(tracker_id, app):
+    REPORT_FOLDER = app.config['REPORT_FOLDER']
     report_path = os.path.join(REPORT_FOLDER, f"{tracker_id}.json")
     report_list = []
     api_num = []
@@ -32,13 +39,17 @@ def api_extraction(tracker_id):
                 report_dict = {}
                 call_list = []
                 load_dict = json.load(load_f)
+                
                 if 'behavior' not in load_dict:
-                    print(file_num + "_notexist")
+                    print(tracker_id + "_notexist")
                     return
+                
                 if load_dict['strings'][0] == "This program must be run under Win32":
-                    print(file_num + "_mustInWin32")
+                    print(tracker_id + "_mustInWin32")
                     return
+                
                 report_dict['md5'] = load_dict['target']['file']['md5']
+                
                 for process in load_dict['behavior']['processes']:
                     if len(process['calls']) != 0:
                         for call in process['calls']:
@@ -47,15 +58,17 @@ def api_extraction(tracker_id):
                                 # Statistics API
                                 if call['api'] not in api_num:
                                      api_num.append(call['api'])
+                
                 report_dict['call_list'] = call_list
                 report_list.append(report_dict)
+            
             except:
-                print(file_num + "_error")
+                print(tracker_id + "_error")
 
     return(api_num)
 
-def input_generate(tracker_id):
-    data = api_extraction(tracker_id)
+def input_generate(tracker_id, app):
+    data = api_extraction(tracker_id, app)
 
     data_x_name = []
     data_x_semantic = []
@@ -101,10 +114,11 @@ def predict(loader):
 
 # model = Net()
 model = Net().to(device)
-torch.save(model, '../src/model.pkl')
+model_path = os.path.join(base_dir, '..', 'src', 'model.pkl')
+torch.save(model, model_path)
 
-def get_result(tracker_id):
-    input_x_name, input_x_semantic, y = input_generate(tracker_id)
+def get_result(tracker_id, app):
+    input_x_name, input_x_semantic, y = input_generate(tracker_id, app)
 
     input_x = np.concatenate([input_x_name, input_x_semantic], 1)
 
