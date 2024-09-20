@@ -49,6 +49,7 @@ def start_cuckoo_monitor(tracker_id, app):
     additional_data = { "error_message":"monitor start"}
     LogManager.update_log_stage(tracker_id, "monitor", additional_data)
     print("hello")
+    
     app_context = app.app_context()
     threading.Thread(target=check_cuckoo_status, args=(tracker_id, app, app_context), daemon=True).start()
 
