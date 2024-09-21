@@ -42,7 +42,7 @@ def upload_to_model(tracker_id, app):
             "result": result
         }
 
-        log_manager.update_log_stage("complete", additional_data)
+        log_manager.update_log_stage("Completed", additional_data)
 
         return True
 
@@ -53,5 +53,5 @@ def upload_to_model(tracker_id, app):
                 "success": False
             }
         }
-        log_manager.update_log_stage("failed", additional_data)
+        log_manager.update_log_stage("Failed", additional_data)
         return False

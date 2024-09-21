@@ -24,8 +24,6 @@ word2id = np.load(word2id_path, allow_pickle=True)['word2id'].item()
 word2behavior = np.load(word2behavior_path, allow_pickle=True)['word2behavior'].item()
 behavior2id = np.load(behavior2id_path, allow_pickle=True)['behavior2id'].item()
 
-REPORT_FOLDER = '../reports'
-
 def api_extraction(tracker_id, app):
     REPORT_FOLDER = app.config['REPORT_FOLDER']
     report_path = os.path.join(REPORT_FOLDER, f"{tracker_id}.json")

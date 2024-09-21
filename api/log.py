@@ -1,17 +1,26 @@
 import os
 import json
 from datetime import datetime
-import uuid
 
 class LogManager:
-    def __init__(self, file_name, app):
+    def __init__(self, tracker_id, app):
         LOG_FOLDER = app.config['LOG_FOLDER']
         
-        self.file_name = file_name
+        self.file_name = tracker_id
         self.log_path = os.path.join(LOG_FOLDER, f"{self.file_name}.json")
-        self.log_data = {
+
+        if os.path.exists(self.log_path):
+            # 如果日誌文件已存在，則載入
+            self.log_data = self.load_log()
+        else:
+            # 否則創建新日誌
+            self.log_data = self.create_log()
+
+    def create_log(self):
+        """創建日誌文件並返回初始的 log_data"""
+        log_data = {
             "file_name": self.file_name,
-            "tracker_id": "",
+            "tracker_id": self.file_name,
             "current_status": "initializing",
             "upload_flow": {
                 "start_time": "",
@@ -33,91 +42,52 @@ class LogManager:
             "error_message": ""
         }
 
-            
-        self.create_log()
-    
-    def create_log(self):
-        with open(self.log_path, 'w') as log_file:
-            json.dump(self.log_data, log_file, indent=4)
+        try:
+            with open(self.log_path, 'w') as log_file:
+                json.dump(log_data, log_file, indent=4)
+            return log_data
+        except Exception as e:
+            print(f"Error creating log file: {e}")
+            return None
+
+    def load_log(self):
+        """載入已存在的日誌文件"""
+        try:
+            with open(self.log_path, 'r') as log_file:
+                return json.load(log_file)
+        except json.JSONDecodeError:
+            print(f"Error: Corrupted log file at {self.log_path}. Recreating log.")
+            return self.create_log()
+        except Exception as e:
+            print(f"Error loading log file: {e}")
+            return None
 
     def update_log_stage(self, current_stage, additional_data=None):
-    # 如果 log 檔案不存在，初始化一個帶有預設值的 log 結構
         if not os.path.exists(self.log_path):
-            self.log_data = {
-                "file_name": self.file_name,
-                "tracker_id": "",
-                "current_status": "initializing",
-                "upload_flow": {
-                    "start_time": "",
-                    "end_time": "",
-                    "success": False
-                },
-                "task_id": 0,
-                "cuckoo_flow": {
-                    "start_time": "",
-                    "end_time": "",
-                    "success": False
-                },
-                "model_flow": {
-                    "start_time": "",
-                    "end_time": "",
-                    "success": False
-                },
-                "result": -1,
-                "error_message": ""
-            }
+            # 如果日誌不存在，重新創建並初始化
+            self.log_data = self.create_log()
         else:
-            # 嘗試讀取現有的 log 檔案
-            try:
-                with open(self.log_path, 'r') as log_file:
-                    self.log_data = json.load(log_file)
-            except json.JSONDecodeError:
-                # 如果 JSON 格式不正確，初始化一個新的 log 結構
-                self.log_data = {
-                    "file_name": self.file_name,
-                    "tracker_id": "",
-                    "current_status": "initializing",
-                    "upload_flow": {
-                        "start_time": "",
-                        "end_time": "",
-                        "success": False
-                    },
-                    "task_id": 0,
-                    "cuckoo_flow": {
-                        "start_time": "",
-                        "end_time": "",
-                        "success": False
-                    },
-                    "model_flow": {
-                        "start_time": "",
-                        "end_time": "",
-                        "success": False
-                    },
-                    "result": -1,
-                    "error_message": ""
-                }
+            # 載入現有日誌
+            self.log_data = self.load_log()
 
-        # 更新當前狀態
+        # 更新當前階段
         self.log_data["current_status"] = current_stage
 
-        # 如果有 additional_data，並且它是一個字典，則更新相應的 log 欄位
+        # 更新附加數據
         if additional_data and isinstance(additional_data, dict):
             for key, value in additional_data.items():
                 if key in self.log_data:
                     if isinstance(self.log_data[key], dict) and isinstance(value, dict):
-                        # 如果欄位是字典，進行深度更新
                         self.log_data[key].update(value)
                     else:
-                        # 否則直接更新
                         self.log_data[key] = value
                 else:
-                    # 如果 additional_data 中的 key 不在 log 結構中，警告開發者
                     print(f"Warning: Key '{key}' not found in log structure.")
         else:
             if additional_data:
                 print(f"Warning: additional_data should be a dictionary but got {type(additional_data)}.")
 
-        # 嘗試將更新後的 log 寫回檔案
+        # 將更新後的數據寫回文件
         try:
             with open(self.log_path, 'w') as log_file:
                 json.dump(self.log_data, log_file, indent=4)

@@ -34,7 +34,7 @@ def upload_file():
             "start_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
     }
-    log_manager.update_log_stage("upload", additional_data)
+    log_manager.update_log_stage("Uploaded", additional_data)
     
     if file and is_allowed_file(file, current_app):
         path = os.path.join(UPLOAD_FOLDER, file.filename)
@@ -44,13 +44,10 @@ def upload_file():
             "upload_flow": {
                 "end_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                 "success": True
-            },
-            "cuckoo_flow": {
-                "start_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             }
         }
 
-        log_manager.update_log_stage("cuckoo_upload", additional_data)
+        log_manager.update_log_stage("Upload completed", additional_data)
     
         success, task_id = upload_to_cuckoo(tracker_id, current_app)
         
@@ -69,10 +66,9 @@ def upload_file():
         additional_data = {
             'task_id': task_id
         }
+    
+        log_manager.update_log_stage("Cuckoo analyzing", additional_data)
 
-        log_manager.update_log_stage("cuckoo_analysis", additional_data)
-
-        print("monitor")
         start_cuckoo_monitor(tracker_id, current_app)
         
         return make_response({"message": f"File {tracker_id} uploaded successfully.", "task_id": task_id, "tracker_id": tracker_id}, HTTPStatus.OK)

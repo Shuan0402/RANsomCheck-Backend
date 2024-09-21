@@ -16,15 +16,18 @@ CUCKOO_URL = 'http://140.124.181.155'
 PORT = '1337'
 HEADERS = {"Authorization": "Bearer YCjQF5fx4Ladj09Hf5ZApg"}
 
-# REPORT_FOLDER = '../reports'
-# LOG_FOLDER = '../logs'
-# UPLOAD_FOLDER = '../uploads'
-
-
 def upload_to_cuckoo(tracker_id, app):
     UPLOAD_FOLDER = app.config['UPLOAD_FOLDER']
     LOG_FOLDER = app.config['LOG_FOLDER']
 
+    log_manager = LogManager(tracker_id, app)
+
+    additional_data = {
+        "cuckoo_flow": {
+            "start_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+    }
+    log_manager.update_log_stage("Cuckoo uploaded", additional_data)
 
     try:
         log_path = os.path.join(LOG_FOLDER, f"{tracker_id}.json")
@@ -42,18 +45,24 @@ def upload_to_cuckoo(tracker_id, app):
         else:
             task_id = r.json()["task_id"]
             return True, task_id
+        
     except Timeout:
         return False, "Connection timed out."
 
 def start_cuckoo_monitor(tracker_id, app):
-    additional_data = { "error_message":"monitor start"}
-    LogManager.update_log_stage(tracker_id, "monitor", additional_data)
-    print("hello")
+    log_manager = LogManager(tracker_id, app)
     
-    app_context = app.app_context()
-    threading.Thread(target=check_cuckoo_status, args=(tracker_id, app, app_context), daemon=True).start()
+    try:
+        additional_data = {"error_message": "monitor start"}
+        log_manager.update_log_stage("monitor", additional_data)
+    except Exception as e:
+        print(f"Error during monitor log update: {e}")
+
+    # app_context = app.app_context()
+    # threading.Thread(target=check_cuckoo_status, args=(tracker_id, app, app_context), daemon=True).start()
 
 def check_cuckoo_status(tracker_id, app, app_context):
+    log_manager = LogManager(tracker_id, app)
     with app_context:
         LOG_FOLDER = app.config['LOG_FOLDER']
 
@@ -81,14 +90,14 @@ def check_cuckoo_status(tracker_id, app, app_context):
                             "success": True
                         }
                     }
-                    LogManager.update_log_stage(tracker_id, "cuckoo_complete", additional_data)
+                    log_manager.update_log_stage("cuckoo_complete", additional_data)
                     upload_to_model(tracker_id)
                     additional_data = {
                         "model_flow": {
                             "upload_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                         }
                     }
-                    LogManager.update_log_stage(tracker_id, "model_upload", additional_data)
+                    log_manager.update_log_stage("model_upload", additional_data)
                     start_model_monitor(tracker_id)
                     return True, "cuckoo success."
                 else:
@@ -98,7 +107,7 @@ def check_cuckoo_status(tracker_id, app, app_context):
                         },
                         "error_message": "can not download the cuckoo report."
                     }
-                    LogManager.update_log_stage(tracker_id, "cuckoo_complete", additional_data)
+                    log_manager.update_log_stage("Cuckoo completed", additional_data)
                     return False, "cuckoo failed."
             elif(r.status_code == 404):
                 additional_data = {
@@ -108,7 +117,7 @@ def check_cuckoo_status(tracker_id, app, app_context):
                     },
                     "error_message": "cuckoo analyze failed."
                 }
-                LogManager.update_log_stage(tracker_id, "cuckoo", additional_data)
+                log_manager.update_log_stage("Failed", additional_data)
                 return False, "cuckoo failed"
             
 
