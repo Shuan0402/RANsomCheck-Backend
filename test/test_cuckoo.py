@@ -1,17 +1,20 @@
 import pytest
 import os
-
+from unittest.mock import MagicMock
 from api.cuckoo_service import upload_to_cuckoo
 
-import os
-
-import os
-import shutil
 
 def test_upload_to_cuckoo():
+    app = MagicMock()
     uploads_dir = '../uploads'
-    os.makedirs(uploads_dir, exist_ok=True)
     logs_dir = '../logs'
+
+    app.config = {
+        'UPLOAD_FOLDER': uploads_dir,
+        'LOG_FOLDER': logs_dir
+    }
+
+    os.makedirs(uploads_dir, exist_ok=True)
     os.makedirs(logs_dir, exist_ok=True)
 
     file_path = os.path.join(uploads_dir, 'test.txt')
@@ -24,7 +27,7 @@ def test_upload_to_cuckoo():
         with open(log_path, "w") as f:
             f.write('{"file_name": "test.txt"}')
 
-    result, message = upload_to_cuckoo('test')
+    result, message = upload_to_cuckoo('test', app)
     assert result == True
 
     os.remove(file_path)

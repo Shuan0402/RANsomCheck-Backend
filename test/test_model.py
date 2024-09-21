@@ -28,7 +28,7 @@ def test_upload_to_model_success(mock_log_init, mock_update_log_stage, mock_get_
     mock_get_result.assert_called_once_with(tracker_id, app)
 
     mock_update_log_stage.assert_called_once_with(
-        "complete",
+        "Completed",
         {
             "model_flow": {
                 "end_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),

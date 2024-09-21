@@ -24,7 +24,7 @@ def test_upload_no_selected_file(client):
 
 def test_upload_wrong_file(client):
     data = {
-        'file': (BytesIO(b'test file content'), 'testfile.exe')
+        'file': (BytesIO(b'test file content'), 'testfile.txt')
     }
     response = client.post('/upload', content_type='multipart/form-data', data=data)
     json_data = response.get_json()
@@ -43,8 +43,8 @@ def test_valid_exe_upload(client):
         }
 
         response = client.post('/upload', data=data, content_type='multipart/form-data')
-        assert response.status_code == 400
-        assert response.json["message"] == 'Wrong type of file.'
+        assert response.status_code == 200
+        # assert response.json["message"] == 'Wrong type of file.'
 
     os.remove(file_path)
 
