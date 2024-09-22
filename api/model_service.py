@@ -29,10 +29,18 @@ def check_model_status(tracker_id, app):
             break
 
 
-def upload_to_model(tracker_id, app):
-    log_manager = LogManager(tracker_id, app)
+def upload_to_model(tracker_id):
+    additional_data = {
+        "model_flow": {
+            "upload_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        }
+    }
+    with current_app.app_context():
+        log_manager = LogManager(tracker_id)
+        log_manager.update_log_stage("Model Uploaded", additional_data)
+        
     try:
-        result = get_result(tracker_id, app)
+        result = get_result(tracker_id)
 
         additional_data = {
             "model_flow": {
@@ -42,7 +50,8 @@ def upload_to_model(tracker_id, app):
             "result": result
         }
 
-        log_manager.update_log_stage("Completed", additional_data)
+        with current_app.app_context():
+            log_manager.update_log_stage("Completed", additional_data)
 
         return True
 
@@ -53,5 +62,7 @@ def upload_to_model(tracker_id, app):
                 "success": False
             }
         }
-        log_manager.update_log_stage("Failed", additional_data)
+        
+        with current_app.app_context():
+            log_manager.update_log_stage("Failed", additional_data)
         return False

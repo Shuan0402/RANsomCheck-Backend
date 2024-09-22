@@ -11,6 +11,8 @@ from http import HTTPStatus
 from dotenv import load_dotenv
 
 from flask import current_app
+
+from .FlaskThread import FlaskThread
 from .log import LogManager
 from .model_service import start_model_monitor, upload_to_model
 
@@ -54,15 +56,25 @@ def upload_to_cuckoo(tracker_id):
         return False, "Connection timed out."
 
 def start_cuckoo_monitor(tracker_id):
-    log_manager = LogManager(tracker_id)
-    print("hello")
-    additional_data = {"error_message": "monitor start"}
-    log_manager.update_log_stage("Cuckoo monitor started", additional_data)
+    print("start monitor")
+    with current_app.app_context():
+        log_manager = LogManager(tracker_id)
+        log_manager.update_log_stage("Cuckoo monitor started")
 
-    threading.Thread(target=check_cuckoo_status, args=(tracker_id,), daemon=True).start()
+    app = current_app._get_current_object()
+
+    thread = FlaskThread(
+        app = app,
+        target=check_cuckoo_status_with_context,
+        kwargs={"tracker_id": tracker_id, "app": app}
+    )
+    thread.start()
+
+def check_cuckoo_status_with_context(tracker_id, app):
+    with app.app_context():
+        check_cuckoo_status(tracker_id)
 
 def check_cuckoo_status(tracker_id):
-    print("mimo")
     log_manager = LogManager(tracker_id)
     with current_app.app_context():
         LOG_FOLDER = current_app.config['LOG_FOLDER']
@@ -79,10 +91,11 @@ def check_cuckoo_status(tracker_id):
         while True:
             time.sleep(10)
 
-            print("pending")
             r = requests.get(CUCKOO_URL + ":" + str(PORT) + '/tasks/view/' + str(task_id), headers=HEADERS)
             
             status = r.json()["task"]["status"]
+            print(status)
+
             if(r.status_code == HTTPStatus.OK and status == "reported"):
                 success, result = download_report(tracker_id, task_id)
                 if(success):
@@ -92,14 +105,17 @@ def check_cuckoo_status(tracker_id):
                             "success": True
                         }
                     }
-                    log_manager.update_log_stage("cuckoo_complete", additional_data)
+                    with current_app.app_context():
+                        log_manager.update_log_stage("cuckoo_complete", additional_data)
+                    
                     upload_to_model(tracker_id)
-                    additional_data = {
-                        "model_flow": {
-                            "upload_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                        }
-                    }
-                    log_manager.update_log_stage("model_upload", additional_data)
+                    
+                    # additional_data = {
+                    #     "model_flow": {
+                    #         "upload_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    #     }
+                    # }
+                    # log_manager.update_log_stage("model_upload", additional_data)
                     start_model_monitor(tracker_id)
                     return True, "cuckoo success."
                 else:
@@ -121,7 +137,6 @@ def check_cuckoo_status(tracker_id):
                 }
                 log_manager.update_log_stage("Failed", additional_data)
                 return False, "cuckoo failed"
-            
 
 def download_report(tracker_id, task_id):
     REPORT_FOLDER = current_app.config['REPORT_FOLDER']

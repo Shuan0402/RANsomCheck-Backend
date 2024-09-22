@@ -1,6 +1,7 @@
 import os
 
 from flask import Flask
+import threading
 
 from api.upload_route import upload_bp
 from api.result_route import result_bp
@@ -24,8 +25,3 @@ def create_app():
     app.register_blueprint(result_bp)
     
     return app
-
-# app = create_app()
-
-# if __name__ == '__main__':
-#     app.run(host='0.0.0.0', port=5000, debug=True)
