@@ -6,6 +6,7 @@ import torch.nn.functional as F
 from torch.nn import Embedding, TransformerEncoder, TransformerEncoderLayer, Linear, Conv2d, ZeroPad2d
 import torch.utils.data as Data
 import warnings
+from flask import current_app
 
 from api.model import Net
 
@@ -19,13 +20,12 @@ word2id_path = os.path.join(base_dir, '..', 'src', 'word2id.npz')
 word2behavior_path = os.path.join(base_dir, '..', 'src', 'word2behavior.npz')
 behavior2id_path = os.path.join(base_dir, '..', 'src', 'behavior2id.npz')
 
-
 word2id = np.load(word2id_path, allow_pickle=True)['word2id'].item()
 word2behavior = np.load(word2behavior_path, allow_pickle=True)['word2behavior'].item()
 behavior2id = np.load(behavior2id_path, allow_pickle=True)['behavior2id'].item()
 
-def api_extraction(tracker_id, app):
-    REPORT_FOLDER = app.config['REPORT_FOLDER']
+def api_extraction(tracker_id):
+    REPORT_FOLDER = current_app.config['REPORT_FOLDER']
     report_path = os.path.join(REPORT_FOLDER, f"{tracker_id}.json")
     report_list = []
     api_num = []
@@ -60,13 +60,13 @@ def api_extraction(tracker_id, app):
                 report_dict['call_list'] = call_list
                 report_list.append(report_dict)
             
-            except:
-                print(tracker_id + "_error")
+            except Exception as e:
+                print(tracker_id + "_error", e)
 
-    return(api_num)
+    return api_num
 
-def input_generate(tracker_id, app):
-    data = api_extraction(tracker_id, app)
+def input_generate(tracker_id):
+    data = api_extraction(tracker_id)
 
     data_x_name = []
     data_x_semantic = []
@@ -76,7 +76,7 @@ def input_generate(tracker_id, app):
     api_sequence = []
     semantic_sequence = []
     
-    while(len(data) < 1000):
+    while len(data) < 1000:
         data.append("_PAD_")
     count = 0
     
@@ -99,7 +99,7 @@ def input_generate(tracker_id, app):
     data_x_semantic = np.array(data_x_semantic)
     data_y = np.array(data_y).reshape(-1, 1)
 
-    return(data_x_name, data_x_semantic, data_y)
+    return data_x_name, data_x_semantic, data_y
     
 def predict(loader):
     model.eval()
@@ -110,13 +110,12 @@ def predict(loader):
             pred = torch.where(pred >= 0.5, torch.ones_like(pred), torch.zeros_like(pred))
         return pred.to('cpu').detach().numpy().tolist()[0]
 
-# model = Net()
 model = Net().to(device)
 model_path = os.path.join(base_dir, '..', 'src', 'model.pkl')
 torch.save(model, model_path)
 
-def get_result(tracker_id, app):
-    input_x_name, input_x_semantic, y = input_generate(tracker_id, app)
+def get_result(tracker_id):
+    input_x_name, input_x_semantic, y = input_generate(tracker_id)
 
     input_x = np.concatenate([input_x_name, input_x_semantic], 1)
 
@@ -136,7 +135,6 @@ def get_result(tracker_id, app):
         model.transformer_encoder = model.transformer_encoder.to(device)
 
     prediction = predict(input_loader)
-    # print("Predictions:")
-    # print(prediction)
+    print(prediction)
 
-    return(prediction)
+    return prediction

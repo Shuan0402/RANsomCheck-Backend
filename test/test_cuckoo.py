@@ -1,36 +1,29 @@
+from . import client
 import pytest
 import os
-from unittest.mock import MagicMock
+from pathlib import Path
 from api.cuckoo_service import upload_to_cuckoo
 
+def test_upload_to_cuckoo(client):
+    # 獲取上傳和日誌目錄的路徑
+    UPLOAD_FOLDER = Path(client.application.config['UPLOAD_FOLDER'])
+    LOG_FOLDER = Path(client.application.config['LOG_FOLDER'])
 
-def test_upload_to_cuckoo():
-    app = MagicMock()
-    uploads_dir = '../uploads'
-    logs_dir = '../logs'
-
-    app.config = {
-        'UPLOAD_FOLDER': uploads_dir,
-        'LOG_FOLDER': logs_dir
-    }
-
-    os.makedirs(uploads_dir, exist_ok=True)
-    os.makedirs(logs_dir, exist_ok=True)
-
-    file_path = os.path.join(uploads_dir, 'test.txt')
-    if not os.path.exists(file_path):
+    # 創建測試文件
+    file_path = UPLOAD_FOLDER / 'test.txt'
+    if not file_path.exists():
         with open(file_path, "w") as f:
             f.write('This is a test file.')
 
-    log_path = os.path.join(logs_dir, 'test.json')
-    if not os.path.exists(log_path):
+    # 創建日誌文件
+    log_path = LOG_FOLDER / 'test.json'
+    if not log_path.exists():
         with open(log_path, "w") as f:
             f.write('{"file_name": "test.txt"}')
 
-    result, message = upload_to_cuckoo('test', app)
-    assert result == True
+    # 使用上下文推送應用
+    with client.application.app_context():
+        result, message = upload_to_cuckoo('test')
 
-    os.remove(file_path)
-    os.remove(log_path)
-    os.rmdir(logs_dir)
-    os.rmdir(uploads_dir)
+    # 斷言結果
+    assert result == True, f"Expected True, got {result}. Message: {message}"

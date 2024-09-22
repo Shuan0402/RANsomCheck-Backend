@@ -8,19 +8,23 @@ from tempfile import NamedTemporaryFile
 from requests.exceptions import Timeout
 from datetime import datetime
 from http import HTTPStatus
+from dotenv import load_dotenv
 
+from flask import current_app
 from .log import LogManager
 from .model_service import start_model_monitor, upload_to_model
 
 CUCKOO_URL = 'http://140.124.181.155'
 PORT = '1337'
-HEADERS = {"Authorization": "Bearer YCjQF5fx4Ladj09Hf5ZApg"}
+load_dotenv() 
+HEADERS = os.getenv('HEADERS')
+HEADERS = json.loads(HEADERS) 
 
-def upload_to_cuckoo(tracker_id, app):
-    UPLOAD_FOLDER = app.config['UPLOAD_FOLDER']
-    LOG_FOLDER = app.config['LOG_FOLDER']
+def upload_to_cuckoo(tracker_id):
+    UPLOAD_FOLDER = current_app.config['UPLOAD_FOLDER']
+    LOG_FOLDER = current_app.config['LOG_FOLDER']
 
-    log_manager = LogManager(tracker_id, app)
+    log_manager = LogManager(tracker_id)
 
     additional_data = {
         "cuckoo_flow": {
@@ -49,22 +53,19 @@ def upload_to_cuckoo(tracker_id, app):
     except Timeout:
         return False, "Connection timed out."
 
-def start_cuckoo_monitor(tracker_id, app):
-    log_manager = LogManager(tracker_id, app)
-    
-    try:
-        additional_data = {"error_message": "monitor start"}
-        log_manager.update_log_stage("monitor", additional_data)
-    except Exception as e:
-        print(f"Error during monitor log update: {e}")
+def start_cuckoo_monitor(tracker_id):
+    log_manager = LogManager(tracker_id)
+    print("hello")
+    additional_data = {"error_message": "monitor start"}
+    log_manager.update_log_stage("Cuckoo monitor started", additional_data)
 
-    # app_context = app.app_context()
-    # threading.Thread(target=check_cuckoo_status, args=(tracker_id, app, app_context), daemon=True).start()
+    threading.Thread(target=check_cuckoo_status, args=(tracker_id,), daemon=True).start()
 
-def check_cuckoo_status(tracker_id, app, app_context):
-    log_manager = LogManager(tracker_id, app)
-    with app_context:
-        LOG_FOLDER = app.config['LOG_FOLDER']
+def check_cuckoo_status(tracker_id):
+    print("mimo")
+    log_manager = LogManager(tracker_id)
+    with current_app.app_context():
+        LOG_FOLDER = current_app.config['LOG_FOLDER']
 
         try:
             log_path = os.path.join(LOG_FOLDER, f"{tracker_id}.json")
@@ -72,6 +73,7 @@ def check_cuckoo_status(tracker_id, app, app_context):
                 data = json.load(log_file)
                 task_id = data["task_id"]
         except FileNotFoundError:
+            print("filed")
             return False, "Doesn't find log file."
         
         while True:
@@ -82,7 +84,7 @@ def check_cuckoo_status(tracker_id, app, app_context):
             
             status = r.json()["task"]["status"]
             if(r.status_code == HTTPStatus.OK and status == "reported"):
-                success, result = download_report(tracker_id, task_id, app)
+                success, result = download_report(tracker_id, task_id)
                 if(success):
                     additional_data = {
                         "cuckoo_flow": {
@@ -121,8 +123,8 @@ def check_cuckoo_status(tracker_id, app, app_context):
                 return False, "cuckoo failed"
             
 
-def download_report(tracker_id, task_id, app):
-    REPORT_FOLDER = app.config['REPORT_FOLDER']
+def download_report(tracker_id, task_id):
+    REPORT_FOLDER = current_app.config['REPORT_FOLDER']
 
     success, result = fetch_result_by_ID(task_id)
     

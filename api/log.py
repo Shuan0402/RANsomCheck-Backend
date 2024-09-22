@@ -1,19 +1,19 @@
 import os
 import json
 from datetime import datetime
+from flask import current_app
 
 class LogManager:
-    def __init__(self, tracker_id, app):
-        LOG_FOLDER = app.config['LOG_FOLDER']
+    def __init__(self, tracker_id):
+        # 使用 current_app 獲取 LOG_FOLDER 配置
+        LOG_FOLDER = current_app.config['LOG_FOLDER']
         
         self.file_name = tracker_id
         self.log_path = os.path.join(LOG_FOLDER, f"{self.file_name}.json")
 
         if os.path.exists(self.log_path):
-            # 如果日誌文件已存在，則載入
             self.log_data = self.load_log()
         else:
-            # 否則創建新日誌
             self.log_data = self.create_log()
 
     def create_log(self):
@@ -64,16 +64,12 @@ class LogManager:
 
     def update_log_stage(self, current_stage, additional_data=None):
         if not os.path.exists(self.log_path):
-            # 如果日誌不存在，重新創建並初始化
             self.log_data = self.create_log()
         else:
-            # 載入現有日誌
             self.log_data = self.load_log()
 
-        # 更新當前階段
         self.log_data["current_status"] = current_stage
 
-        # 更新附加數據
         if additional_data and isinstance(additional_data, dict):
             for key, value in additional_data.items():
                 if key in self.log_data:
@@ -87,7 +83,6 @@ class LogManager:
             if additional_data:
                 print(f"Warning: additional_data should be a dictionary but got {type(additional_data)}.")
 
-        # 將更新後的數據寫回文件
         try:
             with open(self.log_path, 'w') as log_file:
                 json.dump(self.log_data, log_file, indent=4)

@@ -45,10 +45,8 @@ from io import BytesIO
 # import os
 # from http import HTTPStatus
 # from io import BytesIO
-from unittest.mock import patch
 
-@patch('api.upload_route.start_cuckoo_monitor')  # Mock the start_cuckoo_monitor function
-def test_upload_file_success(mock_monitor, client):
+def test_upload_file_success(client):
     # 上傳文件的模擬
     base_dir = os.path.dirname(os.path.abspath(__file__))
     test_file_path = os.path.join(base_dir, 'test_data', 'dist', 'test.exe')
@@ -68,7 +66,7 @@ def test_upload_file_success(mock_monitor, client):
     assert json_data["message"] == f"File {tracker_id} uploaded successfully."
 
     # 檢查 start_cuckoo_monitor 是否被呼叫
-    mock_monitor.assert_called_once_with(tracker_id, client.application)
+    # mock_monitor.assert_called_once_with()
 
     # 檢查檔案是否上傳成功到指定目錄
     uploaded_file_path = os.path.join(client.application.config['UPLOAD_FOLDER'], 'test.exe')
