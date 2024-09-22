@@ -75,8 +75,8 @@ def check_cuckoo_status_with_context(tracker_id, app):
         check_cuckoo_status(tracker_id)
 
 def check_cuckoo_status(tracker_id):
-    log_manager = LogManager(tracker_id)
     with current_app.app_context():
+        log_manager = LogManager(tracker_id)
         LOG_FOLDER = current_app.config['LOG_FOLDER']
 
         try:
@@ -105,17 +105,9 @@ def check_cuckoo_status(tracker_id):
                             "success": True
                         }
                     }
-                    with current_app.app_context():
-                        log_manager.update_log_stage("cuckoo_complete", additional_data)
+                    log_manager.update_log_stage("Cuckoo completed", additional_data)
                     
                     upload_to_model(tracker_id)
-                    
-                    # additional_data = {
-                    #     "model_flow": {
-                    #         "upload_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    #     }
-                    # }
-                    # log_manager.update_log_stage("model_upload", additional_data)
                     start_model_monitor(tracker_id)
                     return True, "cuckoo success."
                 else:
@@ -126,7 +118,7 @@ def check_cuckoo_status(tracker_id):
                         "error_message": "can not download the cuckoo report."
                     }
                     log_manager.update_log_stage("Cuckoo completed", additional_data)
-                    return False, "cuckoo failed."
+                    return False, "Cuckoo failed."
             elif(r.status_code == 404):
                 additional_data = {
                     "cuckoo_flow": {
@@ -136,7 +128,7 @@ def check_cuckoo_status(tracker_id):
                     "error_message": "cuckoo analyze failed."
                 }
                 log_manager.update_log_stage("Failed", additional_data)
-                return False, "cuckoo failed"
+                return False, "Cuckoo failed"
 
 def download_report(tracker_id, task_id):
     REPORT_FOLDER = current_app.config['REPORT_FOLDER']
