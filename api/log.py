@@ -28,6 +28,8 @@ class LogManager:
                 "success": False
             },
             "task_id": 0,
+            "SHA256":"",
+            "API calls":[],
             "cuckoo_flow": {
                 "start_time": "",
                 "end_time": "",

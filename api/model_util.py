@@ -9,7 +9,8 @@ import warnings
 from flask import current_app
 
 from api.model import Net
-
+from .log import LogManager
+ 
 warnings.filterwarnings("ignore")
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -67,6 +68,13 @@ def api_extraction(tracker_id):
 
 def input_generate(tracker_id):
     data = api_extraction(tracker_id)
+
+    additional_data = {
+        "API calls" : data
+    }
+    with current_app.app_context():
+        log_manager = LogManager(tracker_id)
+        log_manager.update_log_stage("Model Analyzing", additional_data)
 
     data_x_name = []
     data_x_semantic = []
@@ -135,6 +143,6 @@ def get_result(tracker_id):
         model.transformer_encoder = model.transformer_encoder.to(device)
 
     prediction = predict(input_loader)
-    print(prediction)
+    # print(prediction)
 
     return prediction

@@ -43,8 +43,8 @@ def upload_to_cuckoo(tracker_id):
             file_name = data["file_name"]
         path = os.path.join(UPLOAD_FOLDER, file_name)
         with open(path, "rb") as sample:
-            files = {"file": ("files", sample), "priority": 3, "unique": False}
-            r = requests.post(CUCKOO_URL + ":" + str(PORT) +  '/tasks/create/file', files=files, headers=HEADERS, timeout=30, data={"priority": 3, "unique": False})
+            files = {"file": ("files", sample), "priority": 4, "unique": False}
+            r = requests.post(CUCKOO_URL + ":" + str(PORT) +  '/tasks/create/file', files=files, headers=HEADERS, timeout=30, data={"priority": 4, "unique": False})
 
         if(r.status_code != HTTPStatus.OK):
             return False, "Upload failed."
@@ -97,11 +97,11 @@ def check_cuckoo_status(tracker_id):
             print(status)
 
             if(r.status_code == HTTPStatus.OK and status == "reported"):
-                success, result = download_report(tracker_id, task_id)
+                success = download_report(tracker_id, task_id)
                 if(success):
                     additional_data = {
                         "cuckoo_flow": {
-                            "complete_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                            "end_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                             "success": True
                         }
                     }
@@ -137,11 +137,24 @@ def download_report(tracker_id, task_id):
     
     if success:
         file_path = os.path.join(REPORT_FOLDER, f"{tracker_id}.json")
-        with open(file_path, 'w') as report_file:
-            report_file.write(result)
-        return True, file_path
-    else:
-        return False, result
+        with open(file_path, 'w', encoding='utf-8') as report_file:
+            report_file.write(json.dumps(result, ensure_ascii=False, indent=4))
+
+        additional_data = {
+            "SHA256": result["target"]["file"]["sha256"]
+        }
+        with current_app.app_context():
+            log_manager = LogManager(tracker_id)
+            log_manager.update_log_stage("Cuckoo completed", additional_data)
+        return True
+    
+    additional_data = {
+        "error_message": "Download report failed"
+    }
+    with current_app.app_context():
+        log_manager = LogManager(tracker_id)
+        log_manager.update_log_stage("Failed", additional_data)
+    return False
 
 def fetch_result_by_ID(id):
     r = requests.get(CUCKOO_URL + ":" + str(PORT) +  '/tasks/report/' + str(id) + '/json', headers=HEADERS)
@@ -155,3 +168,4 @@ def fetch_result_by_ID(id):
         return False, "Report not found."
     else:
         return False, "Unknown error."
+
