@@ -50,6 +50,10 @@ def upload_to_cuckoo(tracker_id):
             return False, "Upload failed."
         else:
             task_id = r.json()["task_id"]
+            additional_data = {
+                "task_id": task_id
+            }
+            log_manager.update_log_stage("Cuckoo uploaded", additional_data)
             return True, task_id
         
     except Timeout:
@@ -88,6 +92,7 @@ def check_cuckoo_status(tracker_id):
             print("filed")
             return False, "Doesn't find log file."
         
+        start_analyzing = False
         while True:
             time.sleep(10)
 
@@ -119,6 +124,16 @@ def check_cuckoo_status(tracker_id):
                     }
                     log_manager.update_log_stage("Cuckoo completed", additional_data)
                     return False, "Cuckoo failed."
+            elif(r.status_code == HTTPStatus.OK and status == "running"):
+                if start_analyzing:
+                    continue
+                additional_data = {
+                    "cuckoo_flow": {
+                        "analysis_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    }
+                }
+                log_manager.update_log_stage("Cuckoo analyzing", additional_data)
+                start_analyzing = True
             elif(r.status_code == 404):
                 additional_data = {
                     "cuckoo_flow": {

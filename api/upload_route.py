@@ -48,9 +48,8 @@ def upload_file():
             }
         }
         
-        with current_app.app_context():
-            log_manager.update_log_stage("Upload completed", additional_data)
-            success, task_id = upload_to_cuckoo(tracker_id)
+        log_manager.update_log_stage("Upload completed", additional_data)
+        success, task_id = upload_to_cuckoo(tracker_id)
         
         if not success:
             additional_data = {
@@ -59,26 +58,24 @@ def upload_file():
                 },
                 "error_message": "cuckoo upload failed"
             }
-
-            with current_app.app_context():
-                log_manager.update_log_stage("Failed", additional_data)
+            log_manager.update_log_stage("Failed", additional_data)
 
             return make_response({"error": "Cuckoo upload failed", "tracker_id": tracker_id}, HTTPStatus.INTERNAL_SERVER_ERROR)
         
         
-        additional_data = {
-            'task_id': task_id
-        }
+        start_cuckoo_monitor(tracker_id)
 
-        with current_app.app_context():
-            log_manager.update_log_stage("Cuckoo analyzing", additional_data)
-
-        with current_app.app_context():
-            start_cuckoo_monitor(tracker_id)
-
-        
         return make_response({"message": f"File {tracker_id} uploaded successfully.", "task_id": task_id, "tracker_id": tracker_id}, HTTPStatus.OK)
 
+    additional_data = {
+        "upload_flow": {
+            "success": False
+        },
+        "error_message": "Wrong type of file."
+    }
+        
+    log_manager.update_log_stage("Failed", additional_data)
+        
     return make_response({"message": "Wrong type of file.", "tracker_id": tracker_id}, HTTPStatus.BAD_REQUEST)
 
 def is_allowed_file(file):

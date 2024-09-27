@@ -32,6 +32,7 @@ class LogManager:
             "API calls":[],
             "cuckoo_flow": {
                 "start_time": "",
+                "analysis_time": "",
                 "end_time": "",
                 "success": False
             },
