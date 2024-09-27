@@ -26,8 +26,8 @@ def test_upload_to_cuckoo(client):
 def test_download_report(client):
     REPORT_FOLDER = Path(client.application.config['REPORT_FOLDER'])
     
-    tracker_id = "dd46dcba-0d98-4458-89f0-0d4914436b39"
-    task_id = 11159
+    tracker_id = "35bf44f4-1936-4094-99e1-df07cbeb9a19"
+    task_id = 11174
 
     file_path = os.path.join(REPORT_FOLDER, f"{tracker_id}.json")
 

@@ -3,7 +3,7 @@ import json
 import numpy as np
 import torch
 import torch.nn.functional as F
-from torch.nn import Embedding, TransformerEncoder, TransformerEncoderLayer, Linear, Conv2d, ZeroPad2d
+from torch.nn import Embedding, Transformer, Linear, Conv2d, ZeroPad2d
 import torch.utils.data as Data
 import warnings
 from flask import current_app
@@ -74,7 +74,7 @@ def input_generate(tracker_id):
     }
     with current_app.app_context():
         log_manager = LogManager(tracker_id)
-        log_manager.update_log_stage("Model Analyzing", additional_data)
+        log_manager.update_log_stage("Model analyzing", additional_data)
 
     data_x_name = []
     data_x_semantic = []
@@ -112,10 +112,11 @@ def input_generate(tracker_id):
 def predict(loader):
     model.eval()
     with torch.no_grad():
-        for step, batch in enumerate(loader):
-            b_x = batch[0].to(device)
+        for step, (b_x, b_y) in enumerate(loader):
+            b_x = b_x.to(device)
             pred = model(b_x)
             pred = torch.where(pred >= 0.5, torch.ones_like(pred), torch.zeros_like(pred))
+
         return pred.to('cpu').detach().numpy().tolist()[0]
 
 model = Net().to(device)
@@ -123,26 +124,25 @@ model_path = os.path.join(base_dir, '..', 'src', 'model.pkl')
 torch.save(model, model_path)
 
 def get_result(tracker_id):
-    input_x_name, input_x_semantic, y = input_generate(tracker_id)
+    input_x_name, input_x_semantic, input_y = input_generate(tracker_id)
 
-    input_x = np.concatenate([input_x_name, input_x_semantic], 1)
+    input_x = np.concatenate([input_x_name, input_x_semantic], axis=1)
 
     input_xt = torch.from_numpy(input_x)
+    input_yt = torch.from_numpy(input_y.astype(np.float32))
 
-    input_dataset = Data.TensorDataset(input_xt)
+    input_dataset = Data.TensorDataset(input_xt, input_yt)
 
     input_loader = Data.DataLoader(
         dataset=input_dataset,
-        batch_size=64,
+        batch_size=1,
         num_workers=1,
     )
 
-    if not hasattr(model, 'transformer_encoder'):
-        encoder_layer = TransformerEncoderLayer(d_model=512, nhead=4, dim_feedforward=512, dropout=0.2)
-        model.transformer_encoder = TransformerEncoder(encoder_layer, num_layers=2)
-        model.transformer_encoder = model.transformer_encoder.to(device)
+    if not hasattr(model, 'transformer'):
+        model.transformer = Transformer(d_model=512, nhead=4, num_encoder_layers=2, num_decoder_layers=0, dim_feedforward=512, dropout=0.2)
+        model.transformer = model.transformer.to(device)
 
     prediction = predict(input_loader)
     # print(prediction)
-
     return prediction

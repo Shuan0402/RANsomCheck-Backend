@@ -1,7 +1,6 @@
 import os
 
 from flask import Flask
-import threading
 
 from api.upload_route import upload_bp
 from api.result_route import result_bp
@@ -12,11 +11,14 @@ def create_app():
     app.config['UPLOAD_FOLDER'] = 'uploads'
     if not os.path.exists(app.config['UPLOAD_FOLDER']):
         os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-
     
     app.config['LOG_FOLDER'] = 'logs'
     if not os.path.exists(app.config['LOG_FOLDER']):
         os.makedirs(app.config['LOG_FOLDER'], exist_ok=True)
+
+    app.config['REPORT_FOLDER'] = 'reports'
+    if not os.path.exists(app.config['REPORT_FOLDER']):
+        os.makedirs(app.config['REPORT_FOLDER'], exist_ok=True)
 
     app.config['ALLOWED_MIME_MAGIC'] = {b'MZ'}
     app.config['ALLOWED_EXTENSIONS'] = {'exe', 'dll'}
