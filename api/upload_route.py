@@ -9,7 +9,7 @@ from http import HTTPStatus
 from api.cuckoo_service import upload_to_cuckoo, start_cuckoo_monitor
 from api.log import LogManager
 
-upload_bp = Blueprint('upload', __name__)
+upload_bp = Blueprint('upload', __name__, url_prefix="/api")
 
 @upload_bp.route('/upload', methods=['POST'])
 def upload_file():

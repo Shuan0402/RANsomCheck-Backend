@@ -4,7 +4,7 @@ from pathlib import Path
 
 from flask import Blueprint, Response, current_app, make_response
 
-result_bp = Blueprint("result", __name__)
+result_bp = Blueprint("result", __name__, url_prefix="/api")
 
 @result_bp.route("/log/<uuid>", methods=['GET'])
 def get_log(uuid):
