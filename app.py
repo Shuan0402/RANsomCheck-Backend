@@ -20,6 +20,10 @@ def create_app():
     if not os.path.exists(app.config['REPORT_FOLDER']):
         os.makedirs(app.config['REPORT_FOLDER'], exist_ok=True)
 
+    app.config['CACHE_FOLDER'] = 'cache'
+    if not os.path.exists(app.config['CACHE_FOLDER']):
+        os.makedirs(app.config['CACHE_FOLDER'], exist_ok=True)
+
     app.config['ALLOWED_MIME_MAGIC'] = {b'MZ'}
     app.config['ALLOWED_EXTENSIONS'] = {'exe', 'dll'}
 

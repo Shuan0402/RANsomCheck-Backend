@@ -10,6 +10,7 @@ from flask import current_app
 
 from api.model import Net
 from .log import LogManager
+from .cache import CacheManager
  
 warnings.filterwarnings("ignore")
 
@@ -66,7 +67,7 @@ def api_extraction(tracker_id):
 
     return api_num
 
-def input_generate(tracker_id):
+def input_generate(tracker_id, SHA256):
     data = api_extraction(tracker_id)
 
     additional_data = {
@@ -75,6 +76,8 @@ def input_generate(tracker_id):
     with current_app.app_context():
         log_manager = LogManager(tracker_id)
         log_manager.update_log_stage("Model analyzing", additional_data)
+    cache_manager = CacheManager(SHA256)
+    cache_manager.update_cache_stage(additional_data)
 
     data_x_name = []
     data_x_semantic = []
@@ -123,8 +126,8 @@ model = Net().to(device)
 model_path = os.path.join(base_dir, '..', 'src', 'model.pkl')
 torch.save(model, model_path)
 
-def get_result(tracker_id):
-    input_x_name, input_x_semantic, input_y = input_generate(tracker_id)
+def get_result(tracker_id, SHA256):
+    input_x_name, input_x_semantic, input_y = input_generate(tracker_id, SHA256)
 
     input_x = np.concatenate([input_x_name, input_x_semantic], axis=1)
 

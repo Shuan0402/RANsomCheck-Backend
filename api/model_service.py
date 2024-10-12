@@ -8,6 +8,7 @@ from flask import current_app
 from .FlaskThread import FlaskThread
 from api.model_util import get_result
 from api.log import LogManager
+from api.cache import CacheManager
 
 def start_model_monitor(tracker_id):
     app = current_app._get_current_object()
@@ -41,7 +42,7 @@ def check_model_status(tracker_id):
                 print(f'File {log_path} does not exist.')
                 break
 
-def upload_to_model(tracker_id):
+def upload_to_model(tracker_id, SHA256):
     additional_data = {
         "model_flow": {
             "start_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
@@ -52,7 +53,7 @@ def upload_to_model(tracker_id):
         log_manager.update_log_stage("Model analyzing", additional_data)
 
     try:
-        result = get_result(tracker_id)
+        result = get_result(tracker_id, SHA256)
         print(result)
 
         additional_data = {
@@ -62,9 +63,14 @@ def upload_to_model(tracker_id):
             },
             "result": result
         }
+        cache_data = {
+            "result": result
+        }
 
         log_manager = LogManager(tracker_id)
         log_manager.update_log_stage("Completed", additional_data)
+        cache_manager = CacheManager(SHA256)
+        cache_manager.update_cache_stage(cache_data)
 
         return True
 

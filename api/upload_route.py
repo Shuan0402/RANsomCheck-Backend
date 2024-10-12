@@ -1,6 +1,8 @@
 import uuid
 import os
 import requests
+import json
+from hashlib import sha256
 
 from flask import Blueprint, request, jsonify, make_response, current_app
 from datetime import datetime
@@ -39,6 +41,8 @@ def upload_file():
     
     if file and is_allowed_file(file):
         path = os.path.join(UPLOAD_FOLDER, file.filename)
+        sha = sha256(file.read()).hexdigest()
+        print(sha)
         file.save(path)
 
         additional_data = {
@@ -49,6 +53,28 @@ def upload_file():
         }
         
         log_manager.update_log_stage("Upload completed", additional_data)
+
+        file.seek(0)
+        if (is_sha256_exist(sha)):
+            result = -1
+            with open (os.path.join(current_app.config["CACHE_FOLDER"], sha + ".json"), 'r') as cache_file:
+                data = json.load(cache_file)
+                result = data["result"]
+                api = data["API calls"]
+            additional_data = {
+                "API calls": api,
+                "result": result,
+                "SHA256": sha,
+                "cuckoo_flow": {
+                    "analysis_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                },
+                "model_flow": {
+                    "end_time": datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                }
+            }
+            log_manager.update_log_stage("Completed", additional_data)
+            return make_response({"message": f"File {tracker_id} uploaded successfully.", "tracker_id": tracker_id}, HTTPStatus.OK)
+
         success, task_id = upload_to_cuckoo(tracker_id)
         
         if not success:
@@ -96,4 +122,13 @@ def is_allowed_file(file):
     if ext in ALLOWED_EXTENSIONS:
         return True
     
+    return False
+
+def is_sha256_exist(sha):
+    CACHE_FOLDER = current_app.config['CACHE_FOLDER']
+
+    for file in os.listdir(CACHE_FOLDER):
+        file_name = file.split('.')[0]
+        if sha == file_name:
+            return True
     return False

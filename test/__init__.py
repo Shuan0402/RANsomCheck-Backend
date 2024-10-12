@@ -9,10 +9,12 @@ def client():
     app.config['UPLOAD_FOLDER'] = 'test_uploads'
     app.config['LOG_FOLDER'] = 'test_logs'
     app.config['REPORT_FOLDER'] = 'test_reports'
+    app.config['CACHE_FOLDER'] = 'test_cache'
     
     with app.test_client() as client:
         with app.app_context():
             os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
             os.makedirs(app.config['LOG_FOLDER'], exist_ok=True)
             os.makedirs(app.config['REPORT_FOLDER'], exist_ok=True)
+            os.makedirs(app.config['CACHE_FOLDER'], exist_ok=True)
         yield client

@@ -7,6 +7,11 @@ logs/
 uploads/
 */share/
 */pyvenv.cfg
+cache/
+reports/
+test_logs/
+test_reports/
+test_cache/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

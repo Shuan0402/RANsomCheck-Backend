@@ -10,14 +10,14 @@ from api.model_service import upload_to_model, check_model_status, start_model_m
 def test_get_result_success(client):
     tracker_id = "test"
     with client.application.app_context():
-        prediction = get_result(tracker_id)
+        prediction = get_result(tracker_id, "test")
     assert prediction == [1.0] or prediction == [0.0]
 
 def test_upload_to_model(client):
     tracker_id = "test_report"
 
     with client.application.app_context():
-        result = upload_to_model(tracker_id)
+        result = upload_to_model(tracker_id, "test")
     assert result == True
 
     # 檢查日誌文件是否存在

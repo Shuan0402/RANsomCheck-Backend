@@ -102,7 +102,7 @@ def check_cuckoo_status(tracker_id):
             print(status)
 
             if(r.status_code == HTTPStatus.OK and status == "reported"):
-                success = download_report(tracker_id, task_id)
+                success, SHA256 = download_report(tracker_id, task_id)
                 if(success):
                     additional_data = {
                         "cuckoo_flow": {
@@ -112,7 +112,7 @@ def check_cuckoo_status(tracker_id):
                     }
                     log_manager.update_log_stage("Cuckoo completed", additional_data)
                     
-                    upload_to_model(tracker_id)
+                    upload_to_model(tracker_id, SHA256)
                     start_model_monitor(tracker_id)
                     return True, "cuckoo success."
                 else:
@@ -155,13 +155,14 @@ def download_report(tracker_id, task_id):
         with open(file_path, 'w', encoding='utf-8') as report_file:
             report_file.write(json.dumps(result, ensure_ascii=False, indent=4))
 
+        SHA256 = result["target"]["file"]["sha256"]
         additional_data = {
-            "SHA256": result["target"]["file"]["sha256"]
+            "SHA256": SHA256
         }
         with current_app.app_context():
             log_manager = LogManager(tracker_id)
             log_manager.update_log_stage("Cuckoo completed", additional_data)
-        return True
+        return True, SHA256
     
     additional_data = {
         "error_message": "Download report failed"
@@ -169,7 +170,7 @@ def download_report(tracker_id, task_id):
     with current_app.app_context():
         log_manager = LogManager(tracker_id)
         log_manager.update_log_stage("Failed", additional_data)
-    return False
+    return False, None
 
 def fetch_result_by_ID(id):
     r = requests.get(CUCKOO_URL + ":" + str(PORT) +  '/tasks/report/' + str(id) + '/json', headers=HEADERS)
