@@ -1,14 +1,14 @@
 # RANsomCheck-Backend
-## Environment
-1. create venv
-   python -m venv myenv_name
-2. activate
-   - windows: myenv\Scripts\activate
-   - Mac, Linux: source myenv_name/bin/activate
-3. module
-   pip install gunicorn Flask pytest requests torch numpy pytest-mock
-4. deactivate
-## Use
-1. run main.py
-2. run Frontend(npm start)
-- can see the status of backend in the terminal of backend
+## service
+1. conda activate backend
+2. cd /home/ubuntu/project/RANsomCheck-Backend
+flask run
+## background program
+1. tmux at -t backend
+   flask run
+2. tmux at -t cuckoo
+   cuckoo -d
+3. tmux at -t cuckooProcess
+   cuckoo process p1d
+4. tmux at -t cuckooAPI
+   cuckoo api -H 140.124.181.155 --port 1337 
