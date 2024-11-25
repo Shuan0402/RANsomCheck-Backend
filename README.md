@@ -1,8 +1,13 @@
 # RANsomCheck-Backend
+## environment
+1. conda create --name python=3.12
+2. conda activate name
+3. conda install numpy pytorch torchvision -c pytorch
+4. pip install flask requests python-dotenv
 ## service
 1. conda activate backend
 2. cd /home/ubuntu/project/RANsomCheck-Backend
-flask run
+3. flask run
 ## background program
 1. tmux at -t backend
    flask run
